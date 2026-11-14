@@ -28,7 +28,7 @@ public class ItemRocketLauncher extends Item {
 
     public ItemRocketLauncher() {
         setRegistryName(MineRustRaid.MODID, "rocket_launcher");
-        setUnlocalizedName(MineRustRaid.MODID + ".rocket_launcher");
+        setTranslationKey(MineRustRaid.MODID + ".rocket_launcher");
         setMaxStackSize(1);
         setFull3D();
         setCreativeTab(CreativeTabs.COMBAT);
