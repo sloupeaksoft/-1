@@ -29,7 +29,6 @@ minecraft {
     runDir = 'run'
     mappings = 'stable_39'
 }
-}
 
 dependencies {
 }
