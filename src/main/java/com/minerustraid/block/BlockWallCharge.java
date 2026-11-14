@@ -1,9 +1,9 @@
 package com.minerustraid.block;
-​
+
 import java.util.Random;
-​
+
 import javax.annotation.Nullable;
-​
+
 import com.minerustraid.MineRustRaid;
 import com.minerustraid.RaidConfig;
 import com.minerustraid.RaidLogic;
@@ -37,27 +37,27 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-​
+
 /**
  * Charge glued to the side of a wall. FACING = direction from the wall to the charge
  * (= the clicked face), so the model always lies flat on the wall regardless of camera angle.
  */
 public class BlockWallCharge extends Block {
-​
+
     public enum Type { SATCHEL, C4 }
-​
+
     public static final PropertyDirection FACING = BlockHorizontal.FACING;
     public static final PropertyInteger COUNT = PropertyInteger.create("count", 1, 4);
-​
+
     private static final EnumFacing[] META_FACINGS = {EnumFacing.NORTH, EnumFacing.EAST, EnumFacing.SOUTH, EnumFacing.WEST};
-​
+
     private static final AxisAlignedBB AABB_NORTH = new AxisAlignedBB(0.2D, 0.15D, 0.75D, 0.8D, 0.85D, 1.0D);
     private static final AxisAlignedBB AABB_SOUTH = new AxisAlignedBB(0.2D, 0.15D, 0.0D, 0.8D, 0.85D, 0.25D);
     private static final AxisAlignedBB AABB_EAST = new AxisAlignedBB(0.0D, 0.15D, 0.2D, 0.25D, 0.85D, 0.8D);
     private static final AxisAlignedBB AABB_WEST = new AxisAlignedBB(0.75D, 0.15D, 0.2D, 1.0D, 0.85D, 0.8D);
-​
+
     private final Type type;
-​
+
     public BlockWallCharge(Type type, String name) {
         super(Material.CIRCUITS);
         this.type = type;
@@ -68,21 +68,21 @@ public class BlockWallCharge extends Block {
         setSoundType(SoundType.METAL);
         setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH).withProperty(COUNT, 1));
     }
-​
+
     public Type getType() {
         return type;
     }
-​
+
     @Override
     protected BlockStateContainer createBlockState() {
         return new BlockStateContainer(this, FACING, COUNT);
     }
-​
+
     @Override
     public IBlockState getStateFromMeta(int meta) {
         return getDefaultState().withProperty(FACING, META_FACINGS[meta & 3]).withProperty(COUNT, ((meta >> 2) & 3) + 1);
     }
-​
+
     @Override
     public int getMetaFromState(IBlockState state) {
         EnumFacing facing = state.getValue(FACING);
@@ -94,28 +94,28 @@ public class BlockWallCharge extends Block {
         }
         return f | ((state.getValue(COUNT) - 1) << 2);
     }
-​
+
     @Override
     public boolean isOpaqueCube(IBlockState state) {
         return false;
     }
-​
+
     @Override
     public boolean isFullCube(IBlockState state) {
         return false;
     }
-​
+
     @Override
     public BlockFaceShape getBlockFaceShape(IBlockAccess worldIn, IBlockState state, BlockPos pos, EnumFacing face) {
         return BlockFaceShape.UNDEFINED;
     }
-​
+
     @SideOnly(Side.CLIENT)
     @Override
     public BlockRenderLayer getRenderLayer() {
         return BlockRenderLayer.CUTOUT;
     }
-​
+
     @Override
     public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
         switch (state.getValue(FACING)) {
@@ -125,22 +125,22 @@ public class BlockWallCharge extends Block {
             default: return AABB_NORTH;
         }
     }
-​
+
     @Nullable
     @Override
     public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, IBlockAccess worldIn, BlockPos pos) {
         return NULL_AABB;
     }
-​
+
     @Override
     public boolean isPassable(IBlockAccess worldIn, BlockPos pos) {
         return true;
     }
-​
+
     public int getFuseTicks() {
         return Math.max(1, type == Type.C4 ? RaidConfig.c4FuseTicks : RaidConfig.satchelFuseTicks);
     }
-​
+
     public boolean tryAddCharge(World world, BlockPos pos, IBlockState state) {
         int count = state.getValue(COUNT);
         int max = Math.max(1, Math.min(4, RaidConfig.maxChargesPerBlock));
@@ -150,26 +150,26 @@ public class BlockWallCharge extends Block {
         world.setBlockState(pos, state.withProperty(COUNT, count + 1), 3);
         return true;
     }
-​
+
     @Override
     public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state) {
         if (!worldIn.isRemote) {
             worldIn.scheduleUpdate(pos, this, getFuseTicks());
         }
     }
-​
+
     @Override
     public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
         if (!worldIn.isRemote) {
             detonate(worldIn, pos, state, rand);
         }
     }
-​
+
     private void detonate(World world, BlockPos pos, IBlockState state, Random rand) {
         int count = state.getValue(COUNT);
         EnumFacing facing = state.getValue(FACING);
         BlockPos wallPos = pos.offset(facing.getOpposite());
-​
+
         int exploded = count;
         if (type == Type.SATCHEL) {
             exploded = 0;
@@ -179,12 +179,12 @@ public class BlockWallCharge extends Block {
                 }
             }
         }
-​
+
         world.setBlockToAir(pos);
         double x = pos.getX() + 0.5D;
         double y = pos.getY() + 0.5D;
         double z = pos.getZ() + 0.5D;
-​
+
         if (exploded <= 0) {
             // dud
             world.playSound(null, pos, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 1.0F, 0.8F);
@@ -193,7 +193,7 @@ public class BlockWallCharge extends Block {
             }
             return;
         }
-​
+
         if (type == Type.SATCHEL) {
             SoundEvent sound = ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation("minerustaddons", "sachelexplode"));
             if (sound != null) {
@@ -202,11 +202,11 @@ public class BlockWallCharge extends Block {
         }
         // isSmoking = false -> no vanilla terrain damage, only raid damage below
         world.newExplosion(null, x, y, z, (float) RaidConfig.chargeExplosionPower, false, false);
-​
+
         double perCharge = type == Type.C4 ? RaidConfig.c4Damage : RaidConfig.satchelDamage;
         RaidLogic.applyDamage(world, wallPos, perCharge * exploded);
     }
-​
+
     @Override
     public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
         if (worldIn.isRemote) {
@@ -218,7 +218,7 @@ public class BlockWallCharge extends Block {
             worldIn.setBlockToAir(pos);
         }
     }
-​
+
     @SideOnly(Side.CLIENT)
     @Override
     public void randomDisplayTick(IBlockState stateIn, World worldIn, BlockPos pos, Random rand) {
@@ -231,7 +231,7 @@ public class BlockWallCharge extends Block {
             worldIn.spawnParticle(EnumParticleTypes.REDSTONE, x, y, z, 0.0D, 0.0D, 0.0D);
         }
     }
-​
+
     @Nullable
     public Item getSourceItem() {
         String[] ids = type == Type.C4 ? RaidConfig.c4Items : RaidConfig.satchelItems;
@@ -240,7 +240,7 @@ public class BlockWallCharge extends Block {
         }
         return ForgeRegistries.ITEMS.getValue(new ResourceLocation(ids[0]));
     }
-​
+
     @Override
     public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
         Item item = getSourceItem();
@@ -248,16 +248,15 @@ public class BlockWallCharge extends Block {
             drops.add(new ItemStack(item, state.getValue(COUNT)));
         }
     }
-​
+
     @Override
     public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
         Item item = getSourceItem();
         return item == null ? ItemStack.EMPTY : new ItemStack(item);
     }
-​
+
     @Override
     public boolean canDropFromExplosion(Explosion explosionIn) {
         return false;
     }
 }
-​
