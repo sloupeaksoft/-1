@@ -32,7 +32,7 @@ public final class ModContent {
     public static void registerItems(RegistryEvent.Register<Item> event) {
         ROCKET = new Item();
         ROCKET.setRegistryName(MineRustRaid.MODID, "rocket");
-        ROCKET.setUnlocalizedName(MineRustRaid.MODID + ".rocket");
+        ROCKET.setTranslationKey(MineRustRaid.MODID + ".rocket");
         ROCKET.setCreativeTab(CreativeTabs.COMBAT);
         ROCKET.setMaxStackSize(16);
 
