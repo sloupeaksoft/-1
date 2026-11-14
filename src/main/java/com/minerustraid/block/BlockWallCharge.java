@@ -62,7 +62,7 @@ public class BlockWallCharge extends Block {
         super(Material.CIRCUITS);
         this.type = type;
         setRegistryName(MineRustRaid.MODID, name);
-        setUnlocalizedName(MineRustRaid.MODID + "." + name);
+        setTranslationKey(MineRustRaid.MODID + "." + name);
         setHardness(0.3F);
         setResistance(0.5F);
         setSoundType(SoundType.METAL);
@@ -112,7 +112,11 @@ public class BlockWallCharge extends Block {
 
     @SideOnly(Side.CLIENT)
     @Override
-    public BlockRenderLayer getBlockLayer() {
+    @SideOnly(Side.CLIENT)
+@Override
+public BlockRenderLayer getRenderLayer() {
+    return BlockRenderLayer.CUTOUT;
+}
         return BlockRenderLayer.CUTOUT;
     }
 
